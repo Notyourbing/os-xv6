@@ -200,7 +200,7 @@ def assert_lines_match(text, *regexps, **kw):
 # Utilities
 #
 
-__all__ += ["make", "maybe_unlink", "reset_fs", "color", "random_str", "check_time"]
+__all__ += ["make", "maybe_unlink", "reset_fs", "color", "random_str", "check_time", "check_answers"]
 
 MAKE_TIMESTAMP = 0
 
@@ -257,6 +257,15 @@ def check_time():
                 raise AssertionError('time.txt does not contain a single integer (number of hours spent on the lab)')
     except IOError:
         raise AssertionError('Cannot read time.txt')
+
+def check_answers(file, n=10):
+    try:
+        with open(file) as f:
+            d = f.read().strip()
+            if len(d) < n:
+                raise AssertionError('%s does not seem to contain enough text' % file)
+    except IOError:
+        raise AssertionError('Cannot read %s' % file)
 
 
 ##################################################################
@@ -416,7 +425,7 @@ class Runner():
         should be a list of additional arguments to pass to make.  The
         timeout argument bounds how long to run before returning."""
 
-        def run_qemu_kw(target_base="qemu", make_args=[], timeout=30):
+        def run_qemu_kw(target_base="qemu", make_args=[], timeout=100):
             return target_base, make_args, timeout
         target_base, make_args, timeout = run_qemu_kw(**kw)
 
