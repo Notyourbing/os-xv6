@@ -90,6 +90,7 @@ int             cpuid(void);
 void            exit(int);
 int             fork(void);
 int             growproc(int);
+void            proc_mapstacks(pagetable_t);
 pagetable_t     proc_pagetable(struct proc *);
 void            proc_freepagetable(pagetable_t, uint64);
 int             kill(int);
@@ -99,7 +100,6 @@ struct proc*    myproc();
 void            procinit(void);
 void            scheduler(void) __attribute__((noreturn));
 void            sched(void);
-void            setproc(struct proc*);
 void            sleep(void*, struct spinlock*);
 void            userinit(void);
 int             wait(uint64);
@@ -119,6 +119,8 @@ void            initlock(struct spinlock*, char*);
 void            release(struct spinlock*);
 void            push_off(void);
 void            pop_off(void);
+uint64          lockfree_read8(uint64 *addr);
+int             lockfree_read4(int *addr);
 #ifdef LAB_LOCK
 void            freelock(struct spinlock*);
 #endif
@@ -163,7 +165,7 @@ int             uartgetc(void);
 // vm.c
 void            kvminit(void);
 void            kvminithart(void);
-void            kvmmap(uint64, uint64, uint64, int);
+void            kvmmap(pagetable_t, uint64, uint64, uint64, int);
 int             mappages(pagetable_t, uint64, uint64, uint64, int);
 pagetable_t     uvmcreate(void);
 void            uvminit(pagetable_t, uchar *, uint);
@@ -194,12 +196,22 @@ void            virtio_disk_intr(void);
 
 
 
+#ifdef LAB_PGTBL
+// vmcopyin.c
+int             copyin_new(pagetable_t, char *, uint64, uint64);
+int             copyinstr_new(pagetable_t, char *, uint64, uint64);
+#endif
+
 // stats.c
 void            statsinit(void);
 void            statsinc(void);
 
 // sprintf.c
 int             snprintf(char*, int, char*, ...);
+
+#ifdef KCSAN
+void            kcsaninit();
+#endif
 
 #ifdef LAB_NET
 // pci.c
